@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ifinal version</title>
+</head>
+<body>
+    <div style="margin: 10px;">
+        <input type="number" id="v-count" min="2" placeholder="Number of vertices">
+        <button onclick="addVertices()">Add Vertices</button>
+        <select id="sourceVertex"></select>
+        <select id="targetVertex"></select>
+        <button onclick="addEdge()">Add Edge</button>
+    </div>
+    <main></main>
+</body>
+
+<script src="graph_api.js"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap');
+    
+    main {
+        position: relative;
+        width: 1000px;
+        height: 600px;
+        border: 1px solid #ccc;
+        font-family: IBB Plex Mono, monospace;
+    }
+
+    .vertex {
+        position: absolute;
+        z-index: 2;
+        cursor: grab;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        border: 1px solid #ccc;
+        border-radius: 100%;
+        color: white;
+        font-size: 15px;
+        user-select: none;
+        background-color: #0c4a6e;
+    }
+
+    .edge {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
+        overflow: visible;
+        height: 1px;
+        border-radius: 1px;
+        font-size: 12.5px;
+        color: black;
+        background-color: #999;
+        transform-origin: top left;
+    }
+</style>
+</html>
