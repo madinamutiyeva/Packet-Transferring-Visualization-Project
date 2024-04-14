@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Page</title>
+</head>
+<body>
+<h1 class="title"></h1>
+<div class="sidebar">
+    <div class="message-info">
+        <label for="sender">Sender:</label>
+        <select id="sender">
+        </select>
+        <label for="receiver">Receiver:</label>
+        <select id="receiver">
+        </select>
+    </div>
+<!--    <div class="vertices-border">-->
+<!--        <input id="vertices-count" type="number" min="2" max="180" placeholder="Number of Users">-->
+<!--        <button onclick="addVertices()">Create Vertices</button>-->
+<!--    </div>-->
+<!--    <div class="vertex-border">-->
+<!--        <input id="source-vertex" type="number" min="0" placeholder="Vertex ID">-->
+<!--        <input id="target-vertex" type="number" min="0" placeholder="Vertex ID">-->
+<!--        <button onclick="addEdge()">Connect</button>-->
+<!--    </div>-->
+<!--    <div class="submit-button-border">-->
+<!--        <button onclick="submit()">Submit</button>-->
+<!--    </div>-->
+</div>
+
+<div class="chat">
+    <div class="name">
+        <span><i class="far fa-user"></i></span>
+        <input
+                type="text"
+                id="name-input"
+                class="name-input"
+                value="Local Chat"
+                maxlength="20"
+        />
+    </div>
+
+    <ul class="message-container" id="message-container">
+        <!-- These li elements are only for reference, and therefore, they are commented out... -->
+        <!-- <li class="message-left">
+          <p class="message">
+            lorem impsun
+            <span>bluebird ● 26 July 10:40</span>
+          </p>
+        </li>
+
+        <li class="message-right">
+          <p class="message">
+            lorem impsun
+            <span>bluebird ● 26 July 10:40</span>
+          </p>
+        </li>
+
+        <li class="message-feedback">
+          <p class="feedback" id="feedback">✍️ killer is typing a message...</p>
+        </li> -->
+    </ul>
+
+    <form class="message-form" id="message-form">
+        <input
+                type="text"
+                name="message"
+                id="message-input"
+                class="message-input"
+        />
+        <div class="v-divider"></div>
+        <button type="submit" class="send-button">Send<span><i class="fas fa-paper-plane"></i></span>
+        </button>
+    </form>
+</div>
+
+<div class="graph">
+    <section id="graph-area"></section>
+</div>
+
+</body>
+</html>
+
+<style>
+    @import url('https://fonts.googlepis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+    * {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 25px;
+        font-family: IBM Plex Mono, monospace;
+
+        margin-top: 60px;
+    }
+
+    .title {
+        margin: 20px 0;
+    }
+
+    .chat {
+        border: 2px solid #14532d;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .name {
+        display: flex;
+        font-size: 32px;
+        font-weight: 700;
+        padding: 8px 16px;
+        color: #7e7e7e;
+        background-color: #bbf7d0;
+    }
+
+    .name > span {
+        color: #bbb;
+    }
+
+    .name-input {
+        font-size: 24px;
+        font-weight: 700;
+        flex-grow: 1;
+        border: none;
+        margin: 0px 12px;
+        outline: none;
+        color: #14532d;
+        background-color: #bbf7d0;
+    }
+
+    .message-container {
+        display: flex;
+        flex-direction: column;
+        background-color: #f6f6f6;
+        width: 400px;
+        height: 600px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+
+    .message-left,
+    .message-right {
+        list-style: none;
+        padding: 8px 12px;
+        margin: 12px;
+        max-width: 250px;
+        font-size: 18px;
+        word-wrap: break-word;
+    }
+
+    .message-left {
+        border-radius: 20px 20px 20px 0px;
+        align-self: flex-start;
+        background-color: #fff;
+        box-shadow: -2px 2px 4px #dcdcdc;
+    }
+
+    .message-right {
+        border-radius: 20px 20px 0px 20px;
+        align-self: flex-end;
+        background-color: #2d2d2d;
+        box-shadow: 2px 2px 4px #dcdcdc;
+        color: #f6f6f6;
+    }
+
+    .message-left > p > span,
+    .message-right > p > span {
+        display: block;
+        font-style: italic;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .feedback {
+        font-style: italic;
+        font-size: 14px;
+        padding: 0px 16px 16px 16px;
+        color: #2d2d2d;
+        text-align: center;
+    }
+
+    .message-form {
+        display: flex;
+        justify-content: space-between;
+        width: 400px;
+    }
+
+    .message-input {
+        flex-grow: 1;
+        height: 48px;
+        font-size: 16px;
+        border: none;
+        outline: none;
+        padding: 0 12px;
+        background-color: #fff;
+    }
+
+    .send-button {
+        height: 48px;
+        font-size: 16px;
+        border: none;
+        padding: 0px 20px;
+        outline: none;
+        background-color: #fff;
+        cursor: pointer;
+    }
+
+    .v-divider {
+        height: 48px;
+        width: 2px;
+        background-color: #f6f6f6;
+    }
+
+    .clients-total {
+        margin: 20px 0;
+        color: #7e7e7e;
+    }
+
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        /*border: 1px solid red;*/
+        /*border-radius: 10px;*/
+    }
+
+    .vertices-border, .vertex-border, .submit-button-border, .message-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
+        gap: 20px;
+        padding: 20px;
+        margin-right: 40px;
+        border: 2px solid #14532d;
+        border-radius: 10px;
+
+        width: 90%;
+        background-color: #bbf7d0;
+    }
+
+    /*.message-info {*/
+    /*    display: flex;*/
+    /*    width: 90%;*/
+
+    /*    flex-direction: column;*/
+
+    /*    border: 1px red solid;*/
+    /*}*/
+
+    input {
+        position: relative;
+        height: 30px;
+        width: 100%;
+        outline: none;
+        border: 1px solid black;
+        border-radius: 5px;
+
+        padding-left: 10px;
+        background-color: white;
+    }
+
+    button {
+        border-radius: 10px;
+        border: 1px solid black;
+        background-color: white;
+
+        width: 80%;
+    }
+
+    #graph-area {
+        position: relative;
+        width: 500px;
+        height: 600px;
+        border: 1px solid #ccc;
+
+        background-color: white;
+    }
+
+    .vertex {
+        position: absolute;
+        z-index: 2;
+        cursor: grab;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 30px;
+        height: 30px;
+        border: 1px solid #ccc;
+        border-radius: 100%;
+        color: white;
+        font-size: 15px;
+        user-select: none;
+        background-color: #0c4a6e;
+    }
+
+    .edge {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
+        overflow: visible;
+        height: 1px;
+        border-radius: 1px;
+        font-size: 12.5px;
+        color: black;
+        user-select: none;
+        background-color: #999;
+        transform-origin: top left;
+    }
+
+</style>
