@@ -165,6 +165,7 @@ function clearGraph() {
     sourceInput.innerHTML = '';
     targetInput.innerHTML = '';
     data = { vertices: [], edges: [] };
+    dataToSend = { vertices: [], edges: [] };
 }
 
 function removeEdge() {
@@ -180,7 +181,7 @@ function removeEdge() {
 }
 
 function submit() {
-    console.log(data);
+    dataToSend = { edges: [], vertices: [] };
     for (let i = 0; i < data.edges.length; i++) {
         let currentEdge = data.edges[i];
         dataToSend.edges.push( {
