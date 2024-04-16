@@ -1,9 +1,44 @@
-let data = { vertices: [], edges: [] };
 let dataToSend = { vertices: [], edges: [] };
 
+let data = { vertices: [], edges: [] };
+
 const area = document.getElementById('graph-area');
-const sourceDropdown = document.getElementById('sourceVertex');
-const targetDropdown = document.getElementById('targetVertex');
+const areaRect = area.getBoundingClientRect();
+const sourceInput = document.getElementById('sourceVertex');
+const targetInput = document.getElementById('targetVertex');
+
+let isDragging = false;
+let currentVertex;
+
+const dragging = (event) => {
+    if (currentVertex && isDragging) {
+        currentVertex.style.left = `${event.clientX - offsetX - areaRect.left}px`;
+        currentVertex.style.top = `${event.clientY - offsetY - areaRect.top}px`;
+
+        data.edges.forEach(edge => {
+            if (
+                edge.sourceBody.id != currentVertex.id &&
+                edge.targetBody.id != currentVertex.id
+            ) return;
+            
+            updateEdgePosition(
+                edge.body,
+                edge.sourceBody.getBoundingClientRect(),
+                edge.targetBody.getBoundingClientRect()
+            );
+        });
+    }
+}
+
+const stopDragging = () => {
+    if (currentVertex && isDragging) {
+        isDragging = false;
+        currentVertex.style.cursor = 'grab';
+        currentVertex.style.zIndex = '2';
+        checkVerticesPosition(currentVertex);
+        currentVertex = null;
+    }
+}
 
 function addVertices() {
     const vCount = parseInt(document.getElementById('v-count').value);
@@ -11,8 +46,8 @@ function addVertices() {
         return;
 
     area.innerHTML = '';
-    sourceDropdown.innerHTML = '';
-    targetDropdown.innerHTML = '';
+    sourceInput.setAttribute('max', vCount);
+    targetInput.innerHTML = '';
     data = { vertices: [], edges: [] };
 
     for (let i = 0; i < vCount; i++) {
@@ -20,84 +55,39 @@ function addVertices() {
         const vertex = document.createElement('div');
         vertex.id = `vertex-${i}`;
         vertex.className = 'vertex';
-        vertex.style.left = (10 + 40 * (i % 24)) + 'px';
-        vertex.style.top = (10 + 40 * parseInt(i/24)) + 'px';
+        vertex.style.left = (10 + 40 * (i % 12)) + 'px';
+        vertex.style.top = (10 + 40 * parseInt(i/12)) + 'px';
         vertex.textContent = i;
         area.appendChild(vertex);
 
         // add each vertex to dataset
         data.vertices[i] = vertex;
 
-        // update dropdowns
-        const option = document.createElement('option');
-        option.text = i;
-        option.value = i;
-
-        sourceDropdown.append(option.cloneNode(true));
-        targetDropdown.append(option);
-
         // add moving behavior
-        var isDragging, currentVertex;
-
         vertex.addEventListener('mousedown', (event) => {
             isDragging = true;
-            const rect = vertex.getBoundingClientRect();
-            offsetX = event.clientX - (rect.left + rect.width / 2) + 20;
-            offsetY = event.clientY - (rect.top + rect.height / 2) + 65;
             currentVertex = vertex;
+            const vRect = currentVertex.getBoundingClientRect();
+            offsetX = event.clientX - vRect.left;
+            offsetY = event.clientY - vRect.top;
             currentVertex.style.zIndex = '3';
             currentVertex.style.cursor = 'grabbing';
         });
     }
-
-    document.addEventListener('mousemove', (event) => {
-        if (currentVertex && isDragging) {
-            const x = event.clientX - offsetX;
-            const y = event.clientY - offsetY;
-            currentVertex.style.left = x + 'px';
-            currentVertex.style.top = y + 'px';
-
-            data.edges.forEach(function(edge) {
-                if (
-                    edge.sourceBody.id != currentVertex.id &&
-                    edge.targetBody.id != currentVertex.id
-                ) return;
-                
-                const sourceRect = edge.sourceBody.getBoundingClientRect();
-                const targetRect = edge.targetBody.getBoundingClientRect();
-                const areaRect = area.getBoundingClientRect();
-
-                // Calculate edge width and height
-                let distance = Math.sqrt((sourceRect.left - targetRect.left) ** 2 + (sourceRect.top - targetRect.top) ** 2);
-                let angle = Math.atan2(targetRect.top - sourceRect.top, targetRect.left - sourceRect.left);
-            
-                // Calculate edge position
-                edge.body.style.left = `${sourceRect.left + sourceRect.width/2 - areaRect.left}px`;
-                edge.body.style.top = `${sourceRect.top + sourceRect.height/2 - areaRect.top}px`;
-                edge.body.style.width = `${distance}px`;
-                edge.body.style.transform = `rotate(${angle * 180 / Math.PI}deg)`;
-                edge.body.textContent = parseInt(distance * 10) / 10;
-            });
-        }
-    });
-
-    document.addEventListener('mouseup', () => {
-        if (currentVertex && isDragging) {
-            isDragging = false;
-            currentVertex.style.cursor = 'grab';
-            currentVertex.style.zIndex = '2';
-            currentVertex = null;
-        }
-    });
+    document.addEventListener('mousemove', dragging);
+    document.addEventListener('mouseup', stopDragging);
 }
 
 function addEdge() {
-    const sourceID = document.getElementById('sourceVertex').value;
-    const targetID = document.getElementById('targetVertex').value;
+    const sourceID = sourceInput.value;
+    const targetID = targetInput.value;
+    const vCount = data.vertices.length;
 
     if (
         sourceID == '' || targetID == '' ||
-        data.edges.find(e => e.source === sourceID && e.target === targetID) || data.edges.find(e => e.source == targetID && e.target == sourceID)
+        sourceID < 0 || sourceID >= vCount ||
+        targetID < 0 || targetID >= vCount ||
+        data.edges.find(e => e.source === sourceID && e.target === targetID)
     ) return;
 
     const edge = document.createElement('div');
@@ -106,21 +96,12 @@ function addEdge() {
 
     const sourceBody = data.vertices[sourceID];
     const targetBody = data.vertices[targetID];
-    const sourceRect = sourceBody.getBoundingClientRect();
-    const targetRect = targetBody.getBoundingClientRect();
-    const areaRect = area.getBoundingClientRect();
 
-    // Calculate edge width and height
-    let distance = Math.sqrt((sourceRect.left - targetRect.left) ** 2 + (sourceRect.top - targetRect.top) ** 2);
-    let angle = Math.atan2(targetRect.top - sourceRect.top, targetRect.left - sourceRect.left);
-
-    // Calculate edge position
-    edge.style.left = `${sourceRect.left + sourceRect.width/2 - areaRect.left}px`;
-    edge.style.top = `${sourceRect.top + sourceRect.height/2 - areaRect.top}px`;
-    edge.style.width = `${distance}px`;
-    edge.style.transform = `rotate(${angle * 180 / Math.PI}deg)`;
-    edge.textContent = parseInt(distance * 10) / 10;
-
+    updateEdgePosition(
+        edge,
+        sourceBody.getBoundingClientRect(),
+        targetBody.getBoundingClientRect()
+    );
     area.appendChild(edge);
     
     data.edges.push({
@@ -132,11 +113,57 @@ function addEdge() {
     });
 }
 
+function checkVerticesPosition(vertex) {
+    const vRect = vertex.getBoundingClientRect();
+    if (
+        areaRect.left <= vRect.left && vRect.left <= areaRect.right - vRect.width &&
+        areaRect.top <= vRect.top && vRect.top <= areaRect.bottom - vRect.height
+    ) return;
+
+    if (vRect.left < areaRect.left)
+        vertex.style.left = '0px';
+    else if (vRect.left > areaRect.right - vRect.width)
+        vertex.style.left = `${areaRect.width - vRect.width}px`;
+
+        if (vRect.top < areaRect.top)
+            vertex.style.top = '0px';
+        else if (vRect.top > areaRect.bottom - vRect.height)
+            vertex.style.top = `${areaRect.height - vRect.height}px`;
+    
+        data.edges.forEach(edge => {
+            if (vertex == edge.sourceBody || vertex == edge.targetBody)
+                updateEdgePosition(
+                    edge.body,
+                    edge.sourceBody.getBoundingClientRect(),
+                    edge.targetBody.getBoundingClientRect()
+                );
+        });
+    }
+    
+    function updateEdgePosition(edgeBody, sourceRect, targetRect) {
+        let distance = Math.sqrt((sourceRect.left - targetRect.left) ** 2 + (sourceRect.top - targetRect.top) ** 2);
+        let angle = Math.atan2(targetRect.top - sourceRect.top, targetRect.left - sourceRect.left);
+    
+        edgeBody.style.left = `${sourceRect.left + sourceRect.width/2 - areaRect.left}px`;
+        edgeBody.style.top = `${sourceRect.top + sourceRect.height/2 - areaRect.top}px`;
+        edgeBody.style.width = `${distance}px`;
+        edgeBody.style.transform = `rotate(${angle * 180 / Math.PI}deg)`;
+        edgeBody.textContent = distance < 100 ? parseInt(distance) : parseInt(distance * 10) / 10;
+    }
+    
+    function submit() {
+        document.removeEventListener('mousemove', dragging);
+        document.removeEventListener('mouseup', stopDragging);
+        document.querySelectorAll('.build').forEach(el => el.remove());
+        document.querySelectorAll('.send').forEach(el => el.style.display = 'flex');
+        data.vertices.forEach(vertex => vertex.style.cursor = 'default');
+        data.edges.forEach(edge => edge.distance = parseInt(edge.body.textContent.replace('px', '')));
+    }
 
 function clearGraph() {
     area.innerHTML = '';
-    sourceDropdown.innerHTML = '';
-    targetDropdown.innerHTML = '';
+    sourceInput.innerHTML = '';
+    targetInput.innerHTML = '';
     data = { vertices: [], edges: [] };
 }
 
