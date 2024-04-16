@@ -1,10 +1,12 @@
+document.addEventListener('DOMContentLoaded', function() {
 const socket = io()
 const messageContainer = document.getElementById('message-container')
 const nameInput = document.getElementById('name-input')
 const messageForm = document.getElementById('message-form')
 const messageInput = document.getElementById('message-input')
-
 const messageTone = new Audio('/message-tone.mp3')
+const sender = document.getElementById('sender')
+const receiver = document.getElementById('receiver')
 
 messageForm.addEventListener('submit', (e) => {
   e.preventDefault()
@@ -38,7 +40,7 @@ function addMessageToUI(isOwnMessage, data) {
             ${data.message}
             <span>${data.name} ● ${moment(data.dateTime).fromNow()}</span>
           </p>
-        </li>
+      </li>
         `
 
   messageContainer.innerHTML += element
@@ -66,6 +68,11 @@ messageInput.addEventListener('blur', (e) => {
   })
 })
 
+sender.addEventListener('change', () => {
+  nameInput.value = sender.value
+});
+
+
 socket.on('feedback', (data) => {
   clearFeedback()
   const element = `
@@ -81,3 +88,4 @@ function clearFeedback() {
     element.parentNode.removeChild(element)
   })
 }
+})
