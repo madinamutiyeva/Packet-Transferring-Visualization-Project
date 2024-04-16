@@ -5,8 +5,8 @@ const nameInput = document.getElementById('name-input')
 const messageForm = document.getElementById('message-form')
 const messageInput = document.getElementById('message-input')
 const messageTone = new Audio('/message-tone.mp3')
-const sender = document.getElementById('sender')
-const receiver = document.getElementById('receiver')
+let sender = document.getElementById('sender')
+let receiver = document.getElementById('receiver')
 
 messageForm.addEventListener('submit', (e) => {
   e.preventDefault()
@@ -14,8 +14,23 @@ messageForm.addEventListener('submit', (e) => {
 })
 
 function sendMessage() {
-  if (messageInput.value === '') return
-  // console.log(messageInput.value)
+  sender = document.getElementById('sender')
+  receiver = document.getElementById('receiver')
+  let shortestPath = JSON.parse(localStorage.getItem('shortest'));
+  if (!sender.value || !receiver.value) {
+    alert("Please select both sender and receiver.");
+    return;
+  }
+  
+  if (shortestPath != null) {
+    alert("There is no path between nodes");
+    return;
+  }
+
+  if (messageInput.value === '') {
+    alert("The field is empty.")
+    return;
+  }
   const data = {
     name: nameInput.value,
     message: messageInput.value,
@@ -25,6 +40,7 @@ function sendMessage() {
   addMessageToUI(true, data)
   messageInput.value = ''
 }
+
 
 socket.on('chat-message', (data) => {
   // console.log(data)
