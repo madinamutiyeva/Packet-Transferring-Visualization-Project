@@ -111,11 +111,11 @@ async function getMessage(newSenderId, newReceiverId) {
 }
 sender.addEventListener('change', async () => {
   nameInput.value = sender.value;
-  await updateMessages(sender.value, receiver.value);
+ // await updateMessages(sender.value, receiver.value);
 });
 
 receiver.addEventListener('change', async () => {
-  await updateMessages(sender.value, receiver.value);
+  //await updateMessages(sender.value, receiver.value);
 });
 
 async function updateMessages(senderId, receiverId) {
@@ -132,8 +132,6 @@ async function updateMessages(senderId, receiverId) {
 function clearData() {
   data = {};
 }
-
-
 async function refreshMessages(senderId, receiverId, messages) {
   try {
     if (!messages || messages.length === 0) {
