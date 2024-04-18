@@ -73,3 +73,31 @@ app.post('/shortest-path', async (req, res) => {
     res.sendStatus(500);
   }
 });
+const { saveChatMessage, getChatMessages } = require('./database/messages.js');
+
+app.post('/save-message', async (req, res) => {
+  try {
+    const messageData = req.body;
+    await saveChatMessage(messageData);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Error saving chat message:', error);
+    res.sendStatus(500);
+  }
+});
+app.get('/get-messages', async (req, res) => {
+  try {
+    const chatMessages = await getChatMessages();
+    const senderId = req.query.sender; 
+    const receiverId = req.query.receiver; 
+
+    if (chatMessages[receiverId] && chatMessages[receiverId][senderId]) {
+      res.json(chatMessages[receiverId][senderId]);
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    console.error('Error retrieving chat messages:', error);
+    res.sendStatus(500);
+  }
+});
