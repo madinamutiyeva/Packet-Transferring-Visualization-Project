@@ -1,3 +1,4 @@
+
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -73,3 +74,57 @@ app.post('/shortest-path', async (req, res) => {
     res.sendStatus(500);
   }
 });
+const { saveChatMessage, getChatMessages } = require('./database/messages.js');
+
+app.post('/save-message', async (req, res) => {
+  try {
+    const messageData = req.body;
+    await saveChatMessage(messageData);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error('Error saving chat message:', error);
+    res.sendStatus(500);
+  }
+});
+// app.get('/get-messages', async (req, res) => {
+//   try {
+//     const chatMessages = await getChatMessages();
+//     console.log(chatMessages, 'test');
+//     const senderId = req.query.sender; // Получатель из запроса
+//     const receiverId = req.query.receiver; // Отправитель из запроса
+
+//     // Проверяем наличие сообщений для данного получателя и отправителя
+//     if (chatMessages[receiverId] && chatMessages[receiverId][senderId]) {
+//       // Если сообщения существуют, отправляем их в ответе
+//       res.json(chatMessages[receiverId][senderId]);
+//     } else {
+//       // Если сообщений нет, отправляем пустой массив
+//       res.json([]);
+//     }
+//   } catch (error) {
+//     console.error('Error retrieving chat messages:', error);
+//     res.sendStatus(500);
+//   }
+// });
+
+app.get('/get-messages', async (req, res) => {
+  try {
+    const senderId = req.query.sender; // Получатель из запроса
+    const receiverId = req.query.receiver; // Отправитель из запроса
+
+    // Retrieve messages directly without checking
+    const chatMessages = await getChatMessages();
+
+    // If messages exist for the specified sender and receiver, send them in the response
+    if (chatMessages[receiverId] && chatMessages[receiverId][senderId]) {
+      res.json(chatMessages[receiverId][senderId]);
+    } else {
+      // If no messages found, send an empty array
+      res.json([]);
+    }
+  } catch (error) {
+    console.error('Error retrieving chat messages:', error);
+    res.sendStatus(500); // Send internal server error status
+  }
+});
+
